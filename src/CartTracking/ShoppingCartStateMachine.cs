@@ -48,10 +48,8 @@ namespace CartTracking
                     context.Instance.OrderId = context.Data.OrderId;
                  })
                  .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.UserName} to {context.Instance.CorrelationId}"))
-                 .Publish(context => new CartRemovedEvent(context.Instance))
-                 .Unschedule(CartExpired).
-                 Finalize(),
-             //.TransitionTo(Ordered),
+                 .Unschedule(CartExpired)
+                 .TransitionTo(Ordered),
              When(ItemAdded)
                  .Then(context =>
                  {
@@ -69,6 +67,15 @@ namespace CartTracking
                 .Publish(context => new CartRemovedEvent(context.Instance))
                 .Finalize()
              );
+
+         During(Ordered,
+            When(ItemAdded)
+               .ThenAsync(context => Console.Out.WriteLineAsync($"Item Already Ordered: {context.Data.UserName}")),
+            When(Submitted)
+               .ThenAsync(context => Console.Out.WriteLineAsync($"Item Already Ordered: {context.Data.UserName}")),
+            When(Removed)
+               .ThenAsync(context => Console.Out.WriteLineAsync($"Item Already Ordered: {context.Data.UserName}"))
+         );
 
          SetCompletedWhenFinalized();
       }

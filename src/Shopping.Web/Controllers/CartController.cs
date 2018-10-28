@@ -34,9 +34,8 @@ namespace Shopping.Web.Controllers
             case "Finish":
                await MvcApplication.Bus.Publish<OrderSubmitted>(new
                {
-                  //OrderId = ?,
+                  OrderId = Guid.NewGuid(),
                   Timestamp = DateTime.UtcNow,
-                  //CartId = ?,
                   UserName = model.UserName ?? "Unknown"
                });
                break;

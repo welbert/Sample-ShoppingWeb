@@ -1,16 +1,16 @@
 namespace Shopping.Contracts
 {
-    using System;
+   using System;
 
 
-    public interface OrderSubmitted
-    {
-        Guid OrderId { get; }
+   public interface OrderSubmitted
+   {
+      Guid OrderId { get; }
 
-        DateTime Timestamp { get; }
+      DateTime Timestamp { get; }
 
-        Guid CartId { get; }
+      //Guid CartId { get; }
 
-        string UserName { get; }
-    }
+      string UserName { get; }
+   }
 }

@@ -17,6 +17,8 @@ namespace CartTracking
 
          Event(() => Submitted, x => x.CorrelateBy(cart => cart.UserName, context => context.Message.UserName));
 
+         Event(() => Removed, x => x.CorrelateBy(cart => cart.UserName, context => context.Message.UserName));
+
          Schedule(() => CartExpired, x => x.ExpirationId, x =>
          {
             x.Delay = TimeSpan.FromSeconds(10);
@@ -47,7 +49,8 @@ namespace CartTracking
                  })
                  .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.UserName} to {context.Instance.CorrelationId}"))
                  .Publish(context => new CartRemovedEvent(context.Instance))
-                 .Unschedule(CartExpired),
+                 .Unschedule(CartExpired).
+                 Finalize(),
              //.TransitionTo(Ordered),
              When(ItemAdded)
                  .Then(context =>
@@ -60,7 +63,11 @@ namespace CartTracking
              When(CartExpired.Received)
                  .ThenAsync(context => Console.Out.WriteLineAsync($"Item Expired: {context.Instance.CorrelationId}"))
                  .Publish(context => new CartRemovedEvent(context.Instance))
-                 .Finalize()
+                 .Finalize(),
+             When(Removed)
+                .ThenAsync(context => Console.Out.WriteLineAsync($"Item Removed: {context.Instance.CorrelationId}"))
+                .Publish(context => new CartRemovedEvent(context.Instance))
+                .Finalize()
              );
 
          SetCompletedWhenFinalized();
@@ -74,6 +81,7 @@ namespace CartTracking
 
       public Event<CartItemAdded> ItemAdded { get; private set; }
       public Event<OrderSubmitted> Submitted { get; private set; }
+      public Event<CartRemoved> Removed { get; private set; }
 
 
       class CartExpiredEvent :

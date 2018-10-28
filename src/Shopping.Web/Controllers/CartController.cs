@@ -41,6 +41,14 @@ namespace Shopping.Web.Controllers
                });
                break;
 
+            case "Remove":
+               await MvcApplication.Bus.Publish<CartRemoved>(new
+               {
+                  Timestamp = DateTime.UtcNow,
+                  UserName = model.UserName ?? "Unknown"
+               });
+               break;
+
             default:
                break;
          }
